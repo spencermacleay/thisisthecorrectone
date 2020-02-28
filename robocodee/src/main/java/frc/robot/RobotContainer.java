@@ -1,0 +1,73 @@
+package frc.robot;
+
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import frc.lib.controllers.AxisButton;
+import frc.lib.controllers.SeaKingXboxController;
+import frc.robot.commands.TeleopDriveCommand;
+import frc.robot.subsystems.*;
+
+public class RobotContainer {
+
+    public final SeaKingXboxController driverController;
+
+    public final DrivetrainSubsystem drivetrainSubsystem;
+    public final IntakeSubsystem intakeSubsystem;
+    public final SpindexerSubsystem spindexerSubsystem;
+    public final ShooterSubsystem shooterSubsystem;
+    //public final WoFSubsystem wofSubsystem;
+
+    public RobotContainer() {
+        // controllers
+        driverController = new SeaKingXboxController(0);
+
+        // Subsystems
+        drivetrainSubsystem = new DrivetrainSubsystem();
+        intakeSubsystem = new IntakeSubsystem();
+        spindexerSubsystem = new SpindexerSubsystem();
+        shooterSubsystem = new ShooterSubsystem();
+       // wofSubsystem = new WoFSubsystem();
+
+        configureDefaultCommands();
+        configureButtonBindings();
+    }
+    public double GetDriverRawAxis(int axis) {
+        return driverController.getRawAxis(axis);
+  
+     }
+    
+    
+    private void configureDefaultCommands() {
+        
+
+        // slow spin by default
+        spindexerSubsystem.setDefaultCommand(new RunCommand(
+                spindexerSubsystem::slowSpin, spindexerSubsystem));
+    }
+
+    private void configureButtonBindings() {
+        driverController.leftBumper
+                .whileHeld(() -> {
+                    intakeSubsystem.startIntaking();
+                    spindexerSubsystem.intakingSpin();
+                }, intakeSubsystem, spindexerSubsystem)
+                .whenReleased(intakeSubsystem::stopIntaking, intakeSubsystem);
+
+        AxisButton rightTrigger = new AxisButton(driverController, 2);
+        rightTrigger
+                .whenPressed(() -> {
+                    spindexerSubsystem.speedySpin();
+                    shooterSubsystem.setRPM(4000);
+                }, spindexerSubsystem)
+                .whileHeld(shooterSubsystem::autoShoot)
+                .whenReleased(() -> shooterSubsystem.setRPM(0));
+
+        //driverController.aButton
+                //.whenPressed(wofSubsystem::extend, wofSubsystem)
+                //.whenReleased(wofSubsystem::retract);
+
+       // driverController.bButton
+               // .whenPressed(wofSubsystem::spinClockwise, wofSubsystem)
+               // .whenReleased(wofSubsystem::stopSpin, wofSubsystem);
+    }
+}
