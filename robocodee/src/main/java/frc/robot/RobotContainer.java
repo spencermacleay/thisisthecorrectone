@@ -1,3 +1,4 @@
+  
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
@@ -43,9 +44,23 @@ public class RobotContainer {
         // slow spin by default
         spindexerSubsystem.setDefaultCommand(new RunCommand(
                 spindexerSubsystem::slowSpin, spindexerSubsystem));
+
+        // You can set default commands in here for subsystems to reference the controller easier.
+        // This is will be active whenever another drivetrain command isnt, but I don't think you have any so you're all good
+        drivetrainSubsystem.setDefaultCommand( new RunCommand( () -> drivetrainSubsystem.setDrivePowers(  () -> GetDriverRawAxis(1), () -> GetDriverRawAxis(5) ), drivetrainSubsystem ) );
     }
 
     private void configureButtonBindings() {
+       
+        driverController.aButton
+                .whileHeld(() -> {
+            spindexerSubsystem.speedySpin();
+            shooterSubsystem.setIndexerMotor(0.5);
+        }, spindexerSubsystem)
+        .whenReleased(() -> shooterSubsystem.setIndexerMotor(0));
+
+
+
         driverController.leftBumper
                 .whileHeld(() -> {
                     intakeSubsystem.startIntaking();
@@ -53,14 +68,14 @@ public class RobotContainer {
                 }, intakeSubsystem, spindexerSubsystem)
                 .whenReleased(intakeSubsystem::stopIntaking, intakeSubsystem);
 
-        AxisButton rightTrigger = new AxisButton(driverController, 2);
+        AxisButton rightTrigger = new AxisButton(driverController, 3);
         rightTrigger
                 .whenPressed(() -> {
                     spindexerSubsystem.speedySpin();
-                    shooterSubsystem.setRPM(4000);
+                    shooterSubsystem.setShooterMotors(1);
                 }, spindexerSubsystem)
-                .whileHeld(shooterSubsystem::autoShoot)
-                .whenReleased(() -> shooterSubsystem.setRPM(0));
+                .whileHeld(() -> shooterSubsystem.setShooterMotors(1))
+                .whenReleased(() -> shooterSubsystem.setShooterMotors(0));
 
         //driverController.aButton
                 //.whenPressed(wofSubsystem::extend, wofSubsystem)

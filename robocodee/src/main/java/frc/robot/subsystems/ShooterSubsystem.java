@@ -9,6 +9,8 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
+import edu.wpi.first.wpilibj.PWMSparkMax;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -16,21 +18,22 @@ import frc.robot.Constants.ShooterConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
 
-    private final CANSparkMax indexer;
+    private final PWMSparkMax indexer;
     private final TalonSRX shooterMaster;
     private final TalonSRX shooterSlave1;
     private final TalonSRX shooterSlave2;
     private final TalonSRX shooterSlave3;
 
-    private final PIDController shooterPID;
+    // No Longer Needed
+    
 
+    // No Longer Needed
     private int desiredRPM;
 
     public ShooterSubsystem() {
-        indexer = new CANSparkMax(ShooterConstants.kIndexerCANID, MotorType.kBrushless);
-        indexer.restoreFactoryDefaults();
-        indexer.setIdleMode(IdleMode.kCoast);
-        indexer.setSmartCurrentLimit(40);
+        indexer = new PWMSparkMax(ShooterConstants.kIndexerID);
+        
+        
 
         shooterMaster = new TalonSRX(ShooterConstants.kShooterMasterCANID);
         shooterSlave1 = new TalonSRX(ShooterConstants.kShooterSlave1CANID);
@@ -57,43 +60,24 @@ public class ShooterSubsystem extends SubsystemBase {
         shooterSlave1.follow(shooterMaster);
         shooterSlave2.follow(shooterMaster);
         shooterSlave3.follow(shooterMaster);
-
-        // no I or D for velocity loops
-        shooterPID = new PIDController(ShooterConstants.kP, 0, 0);
     }
+        public void setShooterMotors(double speed) {
+    
+            shooterMaster.set(ControlMode.PercentOutput, speed);
+            shooterSlave1.set(ControlMode.PercentOutput, speed);
+            shooterSlave2.set(ControlMode.PercentOutput, speed);
+            shooterSlave3.set(ControlMode.PercentOutput, speed);
+          }
 
-    private double getShooterActualRPM() {
-        // divide by 4096 to get rotations/100ms
-        // multiply by 10 to get rotations/second
-        // multiply by 60 to get rotations/minute
-        double encoderRPM = (shooterMaster.getSelectedSensorVelocity() / 4096.0) * 10 * 60;
+          public void setIndexerMotor(double speed){
+            indexer.set(speed);
 
-        // change this to a ratio if you have one between the encoder and the wheel
-        double wheelRPM = encoderRPM * 1;
 
-        return wheelRPM;
-    }
+          }
 
-    private double calculateOutput(int desiredRPM) {
-        double pidOutput = shooterPID.calculate(getShooterActualRPM());
-        double feedforward = ShooterConstants.shooterFeedforward.calculate(desiredRPM);
-
-        return pidOutput + feedforward;
-    }
-
-    public void setRPM(int desiredRPM) {
-        this.desiredRPM = desiredRPM;
-        double shooterPower = calculateOutput(desiredRPM);
-        shooterMaster.set(ControlMode.PercentOutput, shooterPower);
-    }
-
-    public void autoShoot() {
-        boolean shooterRPMCloseEnough = Math.abs(getShooterActualRPM() - desiredRPM) < 100;
-        if (shooterRPMCloseEnough) {
-            indexer.set(1);
-        } else {
-            indexer.set(0);
         }
-    }
-}
+
+	
+
+
 

@@ -23,7 +23,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void startIntaking() {
         extensionPiston.set(true);
-        spinnyMotor.set(0.75);
+        spinnyMotor.set(-0.75);
     }
 
     public void stopIntaking() {

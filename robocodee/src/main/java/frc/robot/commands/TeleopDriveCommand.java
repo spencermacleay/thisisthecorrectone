@@ -28,8 +28,8 @@ public class TeleopDriveCommand extends CommandBase {
 
     @Override
     public void execute() {
-      double leftStickY= m_robotContainer.GetDriverRawAxis(1);
-      double rightStickY= m_robotContainer.GetDriverRawAxis(5);
+      double leftStickY= m_robotContainer.GetDriverRawAxis(Constants.leftStickY);
+      double rightStickY= m_robotContainer.GetDriverRawAxis(Constants.rightStickY);
      
      
       drivetrainSubsystem.setLeftMotors(leftStickY);
